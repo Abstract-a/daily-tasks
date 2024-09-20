@@ -1,8 +1,17 @@
-const express = require('express')
+const express = require('express');
+const { errorHandler } = require('./middleware/errorMiddleware.js');
+const dotenv = require('dotenv').config();
 
-const app = experss()
-const port = 3000
-app.get('./', (req,res) => {res.send("hellow")})
+const app = express();
+const port = process.env.PORT || 5000;
 
-app.listen(port, ()=> {console.log("server running on port 3000")})
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
+app.use('/api/tasks', require('./routes/taskRoutes.js'));
+
+app.use(errorHandler);
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
