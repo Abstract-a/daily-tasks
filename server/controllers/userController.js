@@ -1,20 +1,20 @@
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const User = require('../models/userModel.js');
+const User = require('../models/userModel');
 
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
     res.status(400);
-    throw new Error('All field are mandatory');
+    throw new Error('All fields are mandatory');
   }
 
   const userExists = await User.findOne({ email });
   if (userExists) {
     res.status(400);
-    throw new Error('User exists');
+    throw new Error('User Exists');
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -38,6 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
+
   if (user && (await bcrypt.compare(password, user.password))) {
     res.json({
       _id: user.id,
@@ -50,8 +51,10 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new Error('Invalid data');
   }
 });
+
 const getCurrentUser = asyncHandler(async (req, res) => {
-  res.json({ message: 'Current user data' });
+  const { _id, name, email } = await User.findById(req.user.id);
+  res.status(200).json({ id: _id, name, email });
 });
 
 const generateJWTtoken = (id) =>
